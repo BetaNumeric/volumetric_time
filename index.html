@@ -156,7 +156,6 @@
                         <select id="blendMode">
                             <option value="NormalBlending" selected>Normal</option>
                             <option value="AdditiveBlending">Additive (Glow)</option>
-                            <option value="ScreenBlending">Screen (Bright)</option>
                         </select>
                     </div>
 
@@ -174,6 +173,14 @@
                             <span id="thresholdVal" class="text-gray-200 font-mono">0.0</span>
                         </div>
                         <input type="range" id="threshold" min="0.0" max="0.9" value="0.0" step="0.01">
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label class="text-gray-400">Bright Cutoff</label>
+                            <span id="brightThresholdVal" class="text-gray-200 font-mono">1.0</span>
+                        </div>
+                        <input type="range" id="brightThreshold" min="0.1" max="1.0" value="1.0" step="0.01">
                     </div>
                 </div>
 
@@ -249,7 +256,8 @@
             spacing: document.getElementById('spacing'),
             scale: document.getElementById('scale'),
             blendMode: document.getElementById('blendMode'),
-            threshold: document.getElementById('threshold')
+            threshold: document.getElementById('threshold'),
+            brightThreshold: document.getElementById('brightThreshold')
         };
         
         const displays = {
@@ -257,7 +265,8 @@
             opacity: document.getElementById('opacityVal'),
             spacing: document.getElementById('spacingVal'),
             scale: document.getElementById('scaleVal'),
-            threshold: document.getElementById('thresholdVal')
+            threshold: document.getElementById('thresholdVal'),
+            brightThreshold: document.getElementById('brightThresholdVal')
         };
 
         // --- Shaders ---
@@ -273,35 +282,29 @@
             uniform sampler2D map;
             uniform float globalOpacity;
             uniform float threshold;
+            uniform float brightThreshold;
             varying vec2 vUv;
 
             void main() {
                 vec4 texColor = texture2D(map, vUv);
                 
                 float alphaMap = 1.0;
+                float luminance = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
                 
-                // Only apply thresholding if the user requests it (value > 0.01)
+                // Dark Cutoff: Remove pixels darker than threshold
                 if (threshold > 0.01) {
-                     float luminance = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
-                     alphaMap = smoothstep(threshold, threshold + 0.15, luminance);
+                     alphaMap *= smoothstep(threshold, threshold + 0.15, luminance);
+                }
+
+                // Bright Cutoff: Remove pixels brighter than brightThreshold
+                if (brightThreshold < 0.99) {
+                    float alphaBright = 1.0 - smoothstep(brightThreshold - 0.15, brightThreshold, luminance);
+                    alphaMap *= alphaBright;
                 }
                 
                 gl_FragColor = vec4(texColor.rgb, texColor.a * globalOpacity * alphaMap);
             }
         `;
-
-        // --- Helper: Blending Logic ---
-        function applyBlending(material, modeName) {
-            if (modeName === 'ScreenBlending') {
-                // Manual Screen Blending Implementation
-                material.blending = THREE.CustomBlending;
-                material.blendEquation = THREE.AddEquation;
-                material.blendSrc = THREE.OneFactor;
-                material.blendDst = THREE.OneMinusSrcColorFactor;
-            } else {
-                material.blending = THREE[modeName];
-            }
-        }
 
         // --- Initialization ---
         function init() {
@@ -387,6 +390,12 @@
                 updateUniforms('threshold', val);
             });
 
+            inputs.brightThreshold.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                displays.brightThreshold.textContent = val;
+                updateUniforms('brightThreshold', val);
+            });
+
             inputs.spacing.addEventListener('input', (e) => {
                 const val = parseFloat(e.target.value);
                 displays.spacing.textContent = val;
@@ -405,10 +414,9 @@
 
             inputs.blendMode.addEventListener('change', (e) => {
                 const modeName = e.target.value;
-                
                 stackGroup.children.forEach(mesh => {
                     if(mesh.material) {
-                        applyBlending(mesh.material, modeName);
+                        mesh.material.blending = THREE[modeName];
                         mesh.material.needsUpdate = true;
                     }
                 });
@@ -553,6 +561,7 @@
             const spacing = parseFloat(inputs.spacing.value);
             const initialOpacity = parseFloat(inputs.opacity.value);
             const initialThreshold = parseFloat(inputs.threshold.value);
+            const initialBrightThreshold = parseFloat(inputs.brightThreshold.value);
             const modeName = inputs.blendMode.value;
             const baseSize = 10;
 
@@ -563,7 +572,8 @@
                     uniforms: {
                         map: { value: frameData.texture },
                         globalOpacity: { value: initialOpacity },
-                        threshold: { value: initialThreshold }
+                        threshold: { value: initialThreshold },
+                        brightThreshold: { value: initialBrightThreshold }
                     },
                     vertexShader: vertexShader,
                     fragmentShader: fragmentShader,
@@ -572,8 +582,7 @@
                     depthWrite: false
                 });
 
-                // Apply blending safely
-                applyBlending(material, modeName);
+                material.blending = THREE[modeName];
 
                 const plane = new THREE.Mesh(geometry, material);
                 plane.rotation.x = -Math.PI / 2;
