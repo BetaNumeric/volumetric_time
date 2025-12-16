@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Volume Visualizer</title>
+    <title>Volumetric Time Visualizer</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js -->
@@ -277,8 +277,15 @@
 
             void main() {
                 vec4 texColor = texture2D(map, vUv);
-                float luminance = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
-                float alphaMap = smoothstep(threshold, threshold + 0.15, luminance);
+                
+                float alphaMap = 1.0;
+                
+                // Only apply thresholding if the user requests it (value > 0.01)
+                if (threshold > 0.01) {
+                     float luminance = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+                     alphaMap = smoothstep(threshold, threshold + 0.15, luminance);
+                }
+                
                 gl_FragColor = vec4(texColor.rgb, texColor.a * globalOpacity * alphaMap);
             }
         `;
