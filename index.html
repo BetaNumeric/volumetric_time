@@ -91,12 +91,51 @@
         <!-- Scrollable Content -->
         <div class="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
             
-            <!-- File Input -->
-            <div class="group relative">
-                <label class="block w-full cursor-pointer bg-gray-900 border border-gray-800 border-dashed hover:border-gray-600 rounded-lg p-3 text-center transition">
-                    <span class="text-xs text-gray-400 font-medium group-hover:text-gray-200">Click to Upload Video</span>
-                    <input type="file" id="videoInput" accept="video/*" class="hidden"/>
-                </label>
+            <!-- Video Source Section -->
+            <div class="space-y-3">
+                <h2 class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Video Source</h2>
+                
+                <div class="group relative">
+                    <label class="block w-full cursor-pointer bg-gray-900 border border-gray-800 border-dashed hover:border-gray-600 rounded-lg p-3 text-center transition">
+                        <span class="text-xs text-gray-400 font-medium group-hover:text-gray-200">Click to Upload Video</span>
+                        <input type="file" id="videoInput" accept="video/*" class="hidden"/>
+                    </label>
+                </div>
+
+                <!-- Trim Controls -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs text-gray-400">
+                        <span>Trim</span>
+                        <span id="trimValues" class="font-mono text-[10px]">0.0s - 0.0s</span>
+                    </div>
+                    <div class="space-y-1 pt-1">
+                        <input type="range" id="trimStart" min="0" max="100" value="0" step="0.1" class="accent-green-500">
+                        <input type="range" id="trimEnd" min="0" max="100" value="100" step="0.1" class="accent-red-500">
+                    </div>
+                </div>
+
+                <!-- Source Settings -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 uppercase">FPS</label>
+                        <select id="fpsSelect">
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="30" selected>30</option>
+                            <option value="48">48</option>
+                            <option value="60">60</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-500 uppercase">Max Res</label>
+                        <select id="resolutionSelect">
+                            <option value="400">Low</option>
+                            <option value="800" selected>Med</option>
+                            <option value="1200">High</option>
+                            <option value="2160">Ultra</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Status -->
@@ -110,9 +149,74 @@
                 </div>
             </div>
 
+            <hr class="border-gray-800" />
+
             <!-- Controls Group -->
             <div id="controlsArea" class="space-y-5 transition-opacity duration-300">
                 
+                <!-- Playback Section -->
+                <div class="space-y-3">
+                    <h2 class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Playback</h2>
+                    
+                    <div class="space-y-1">
+                        <label class="text-xs text-gray-400 block mb-1">Mode</label>
+                        <select id="playbackMode">
+                            <option value="static" selected>Static Stack</option>
+                            <option value="scan">Scanning Slice</option>
+                            <option value="build">Progressive Build</option>
+                        </select>
+                    </div>
+
+                    <!-- Scanning Options (Hidden unless in Scan mode) -->
+                    <div id="scanOptions" class="hidden flex-col space-y-2 pt-1 mb-2 pl-2 border-l border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="smoothMotionToggle" class="w-3 h-3 text-white bg-gray-800 border-gray-700 rounded focus:ring-0 focus:ring-offset-0 cursor-pointer">
+                                <label for="smoothMotionToggle" class="ml-2 text-xs text-gray-400 hover:text-white cursor-pointer select-none">Smooth Motion</label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="lightPaintToggle" class="w-3 h-3 text-white bg-gray-800 border-gray-700 rounded focus:ring-0 focus:ring-offset-0 cursor-pointer">
+                                <label for="lightPaintToggle" class="ml-2 text-xs text-blue-400 font-bold hover:text-blue-300 cursor-pointer select-none" title="Accumulate frames like long exposure">Light Painting</label>
+                            </div>
+                            <button id="clearPaintBtn" class="text-[10px] text-gray-500 hover:text-white border border-gray-700 hover:border-gray-500 rounded px-2 py-0.5 transition" title="Clear Canvas">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2 pt-1">
+                        <button id="playPauseBtn" class="flex-1 py-1.5 bg-gray-800 hover:bg-gray-700 rounded text-xs text-white border border-gray-700 transition font-medium">
+                            Play
+                        </button>
+                        <button id="resetAnimBtn" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded text-xs text-white border border-gray-700 transition" title="Reset Animation">
+                            ↺
+                        </button>
+                    </div>
+
+                    <div class="space-y-1 pt-1">
+                        <div class="flex justify-between text-xs">
+                            <label class="text-gray-400">Timeline</label>
+                            <div class="flex items-center space-x-2">
+                                <label for="loopToggle" class="text-[10px] text-gray-500 cursor-pointer select-none">Loop</label>
+                                <input type="checkbox" id="loopToggle" checked class="w-3 h-3 text-white bg-gray-800 border-gray-700 rounded focus:ring-0 cursor-pointer">
+                            </div>
+                        </div>
+                        <input type="range" id="timeline" min="0" max="100" value="0" step="0.1" class="accent-blue-500">
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <label class="text-gray-400">Speed</label>
+                            <span id="speedVal" class="text-gray-200 font-mono">1.0x</span>
+                        </div>
+                        <input type="range" id="speed" min="0.1" max="3.0" value="1.0" step="0.1">
+                    </div>
+                </div>
+
+                <hr class="border-gray-800" />
+
                 <!-- Geometry Section -->
                 <div class="space-y-3">
                     <h2 class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Geometry</h2>
@@ -122,7 +226,7 @@
                             <label class="text-gray-400">Frames</label>
                             <span id="frameCountVal" class="text-gray-200 font-mono">200</span>
                         </div>
-                        <input type="range" id="frameCount" min="10" max="600" value="200" step="10">
+                        <input type="range" id="frameCount" min="10" max="600" value="200" step="1">
                     </div>
 
                     <div class="space-y-1">
@@ -148,7 +252,7 @@
                 </div>
 
                 <!-- Rendering Section -->
-                <div class="space-y-3">
+                <div class="space-y-3 border-t border-gray-800 pt-4">
                     <h2 class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Rendering</h2>
 
                     <div class="space-y-1">
@@ -189,7 +293,7 @@
                 </button>
             </div>
             
-            <div class="text-[10px] text-gray-600 text-center select-none">
+            <div class="text-[10px] text-gray-600 text-center select-none pt-4">
                 Interact to Rotate • Scroll to Zoom
             </div>
         </div>
@@ -202,11 +306,35 @@
         let scene, renderer, controls;
         let activeCamera, perspCamera, orthoCamera; // Cameras
         let stackGroup = new THREE.Group();
-        let frameTextures = [];
+        let scannerMesh; // Smooth scanner mesh
+        let frameTextures = []; // Stores Meshes, but we access texture via mesh.material
         let isProcessing = false;
+        let currentVideoDuration = 0; 
         
+        // Tracking for Light Painting
+        const lastCameraPos = new THREE.Vector3();
+        const lastCameraQuat = new THREE.Quaternion();
+        const backgroundColor = new THREE.Color(0x050505);
+
+        // Generation Parameters Storage (for visibility calculations)
+        const stackGenParams = {
+            start: 0,
+            end: 0,
+            duration: 0
+        };
+
+        // Playback State
+        const playback = {
+            isPlaying: false,
+            mode: 'static', 
+            currentIndex: 0,
+            direction: 1,
+            speed: 1.0,
+            lastTime: 0,
+            loop: true
+        };
+
         // Settings
-        const MAX_TEXTURE_SIZE = 400; 
         const ORTHO_VIEW_SIZE = 60; 
         let targetFrameCount = 200;
         
@@ -220,6 +348,32 @@
         const regenerateBtn = document.getElementById('regenerateBtn');
         const orthoToggle = document.getElementById('orthoToggle');
 
+        // Playback DOM
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const resetAnimBtn = document.getElementById('resetAnimBtn');
+        const playbackModeSel = document.getElementById('playbackMode');
+        const speedInput = document.getElementById('speed');
+        const speedVal = document.getElementById('speedVal');
+        const timelineInput = document.getElementById('timeline');
+        const loopToggle = document.getElementById('loopToggle');
+        
+        // Geometry / Source DOM
+        const fpsSelect = document.getElementById('fpsSelect');
+        const resolutionSelect = document.getElementById('resolutionSelect');
+        const frameCountInput = document.getElementById('frameCount');
+        const frameCountVal = document.getElementById('frameCountVal');
+        
+        // Trim DOM
+        const trimStartInput = document.getElementById('trimStart');
+        const trimEndInput = document.getElementById('trimEnd');
+        const trimValues = document.getElementById('trimValues');
+        
+        // Conditional UI
+        const scanOptions = document.getElementById('scanOptions');
+        const smoothToggle = document.getElementById('smoothMotionToggle');
+        const lightPaintToggle = document.getElementById('lightPaintToggle');
+        const clearPaintBtn = document.getElementById('clearPaintBtn');
+
         // Panel Toggle Logic
         const mainPanel = document.getElementById('mainPanel');
         const openBtn = document.getElementById('openSettingsBtn');
@@ -227,19 +381,13 @@
 
         function togglePanel(show) {
             if (show) {
-                // Show Panel
                 mainPanel.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
                 mainPanel.classList.add('opacity-100', 'scale-100');
-                
-                // Hide Open Button
                 openBtn.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
                 openBtn.classList.remove('opacity-100', 'scale-100');
             } else {
-                // Hide Panel
                 mainPanel.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
                 mainPanel.classList.remove('opacity-100', 'scale-100');
-                
-                // Show Open Button
                 openBtn.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
                 openBtn.classList.add('opacity-100', 'scale-100');
             }
@@ -247,7 +395,6 @@
 
         closeBtn.addEventListener('click', () => togglePanel(false));
         openBtn.addEventListener('click', () => togglePanel(true));
-
 
         // Sliders & Inputs
         const inputs = {
@@ -291,12 +438,10 @@
                 float alphaMap = 1.0;
                 float luminance = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
                 
-                // Dark Cutoff: Remove pixels darker than threshold
                 if (threshold > 0.01) {
                      alphaMap *= smoothstep(threshold, threshold + 0.15, luminance);
                 }
 
-                // Bright Cutoff: Remove pixels brighter than brightThreshold
                 if (brightThreshold < 0.99) {
                     float alphaBright = 1.0 - smoothstep(brightThreshold - 0.15, brightThreshold, luminance);
                     alphaMap *= alphaBright;
@@ -313,7 +458,7 @@
 
             // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050505);
+            scene.background = backgroundColor;
             
             // Cameras
             perspCamera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
@@ -329,10 +474,16 @@
 
             activeCamera = perspCamera;
 
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: false });
+            // Renderer - preserveDrawingBuffer is KEY for Light Painting
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true, 
+                preserveDrawingBuffer: true 
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(backgroundColor);
+            renderer.autoClear = true; 
             container.appendChild(renderer.domElement);
 
             // Controls
@@ -341,6 +492,10 @@
             controls.dampingFactor = 0.05;
             controls.autoRotate = true;
             controls.autoRotateSpeed = 1.0;
+            
+            // Initial tracker
+            lastCameraPos.copy(activeCamera.position);
+            lastCameraQuat.copy(activeCamera.quaternion);
 
             scene.add(stackGroup);
 
@@ -348,14 +503,115 @@
             window.addEventListener('resize', onWindowResize);
             fileInput.addEventListener('change', handleFileSelect);
             
-            // Camera Switching Logic
+            // Trim Logic
+            function updateTrimLabel() {
+                trimValues.textContent = `${parseFloat(trimStartInput.value).toFixed(1)}s - ${parseFloat(trimEndInput.value).toFixed(1)}s`;
+            }
+            
+            trimStartInput.addEventListener('input', () => {
+                if (parseFloat(trimStartInput.value) >= parseFloat(trimEndInput.value)) {
+                    trimStartInput.value = parseFloat(trimEndInput.value) - 0.1;
+                }
+                updateTrimLabel();
+                updateFrameSliderLimits(); 
+                updateVisibility(); // Live Preview
+            });
+            
+            trimEndInput.addEventListener('input', () => {
+                if (parseFloat(trimEndInput.value) <= parseFloat(trimStartInput.value)) {
+                    trimEndInput.value = parseFloat(trimStartInput.value) + 0.1;
+                }
+                updateTrimLabel();
+                updateFrameSliderLimits();
+                updateVisibility(); // Live Preview
+            });
+
+            // Playback Controls
+            function updateScanOptionsVisibility() {
+                if (playback.mode === 'scan') {
+                    scanOptions.classList.remove('hidden');
+                    scanOptions.classList.add('flex');
+                } else {
+                    scanOptions.classList.add('hidden');
+                    scanOptions.classList.remove('flex');
+                }
+            }
+
+            playbackModeSel.addEventListener('change', (e) => {
+                playback.mode = e.target.value;
+                updateScanOptionsVisibility();
+
+                if(playback.mode === 'static') {
+                    playback.isPlaying = false;
+                    playPauseBtn.textContent = 'Play';
+                    updateVisibility(); 
+                } else {
+                    if (!playback.isPlaying) {
+                       playback.isPlaying = true; 
+                       playPauseBtn.textContent = 'Pause';
+                    }
+                }
+            });
+
+            playPauseBtn.addEventListener('click', () => {
+                playback.isPlaying = !playback.isPlaying;
+                playPauseBtn.textContent = playback.isPlaying ? 'Pause' : 'Play';
+                if(playback.mode === 'static' && playback.isPlaying) {
+                    playback.mode = 'scan';
+                    playbackModeSel.value = 'scan';
+                    updateScanOptionsVisibility();
+                }
+            });
+
+            resetAnimBtn.addEventListener('click', () => {
+                playback.currentIndex = 0;
+                playback.direction = 1;
+                timelineInput.value = 0;
+                renderer.clear(); 
+                updateVisibility();
+            });
+            
+            clearPaintBtn.addEventListener('click', () => {
+                renderer.clear();
+            });
+
+            speedInput.addEventListener('input', (e) => {
+                playback.speed = parseFloat(e.target.value);
+                speedVal.textContent = playback.speed.toFixed(1) + 'x';
+            });
+            
+            timelineInput.addEventListener('input', (e) => {
+                const pct = parseFloat(e.target.value);
+                if (stackGroup.children.length > 0) {
+                     const totalFrames = stackGroup.children.length;
+                     playback.currentIndex = (pct / 100) * (totalFrames - 1);
+                     updateVisibility();
+                }
+            });
+
+            loopToggle.addEventListener('change', (e) => {
+                playback.loop = e.target.checked;
+            });
+            
+            lightPaintToggle.addEventListener('change', (e) => {
+                 if(e.target.checked) {
+                     renderer.clear();
+                 } else {
+                     renderer.autoClear = true;
+                     scene.background = backgroundColor;
+                 }
+            });
+            
+            fpsSelect.addEventListener('change', () => {
+                updateFrameSliderLimits();
+            });
+
             orthoToggle.addEventListener('change', (e) => {
                 const useOrtho = e.target.checked;
                 const prevCamera = activeCamera;
                 
                 if (useOrtho) {
                     activeCamera = orthoCamera;
-                    // Try to match view direction
                     activeCamera.position.copy(prevCamera.position);
                     activeCamera.lookAt(controls.target);
                 } else {
@@ -365,8 +621,9 @@
                 }
 
                 controls.object = activeCamera;
-                controls.update(); // Re-sync controls
-                onWindowResize(); // Force projection update
+                controls.update(); 
+                onWindowResize(); 
+                renderer.clear(); 
             });
 
             const updateUniforms = (key, value) => {
@@ -375,6 +632,9 @@
                         mesh.material.uniforms[key].value = value;
                     }
                 });
+                if (scannerMesh && scannerMesh.material && scannerMesh.material.uniforms) {
+                    scannerMesh.material.uniforms[key].value = value;
+                }
             };
 
             // Setup Slider Listeners
@@ -406,6 +666,7 @@
                 const val = parseFloat(e.target.value);
                 displays.scale.textContent = val;
                 stackGroup.scale.setScalar(val);
+                if(scannerMesh) scannerMesh.scale.setScalar(val);
             });
 
             inputs.count.addEventListener('input', (e) => {
@@ -414,12 +675,19 @@
 
             inputs.blendMode.addEventListener('change', (e) => {
                 const modeName = e.target.value;
+                const blend = THREE[modeName];
+                
                 stackGroup.children.forEach(mesh => {
                     if(mesh.material) {
-                        mesh.material.blending = THREE[modeName];
+                        mesh.material.blending = blend;
                         mesh.material.needsUpdate = true;
                     }
                 });
+                
+                if (scannerMesh && scannerMesh.material) {
+                    scannerMesh.material.blending = blend;
+                    scannerMesh.material.needsUpdate = true;
+                }
             });
             
             regenerateBtn.addEventListener('click', () => {
@@ -430,6 +698,27 @@
         }
 
         // --- Video Processing ---
+        
+        function updateFrameSliderLimits() {
+            if (currentVideoDuration <= 0) return;
+            
+            const start = parseFloat(trimStartInput.value);
+            const end = parseFloat(trimEndInput.value);
+            const trimmedDuration = Math.max(0.1, end - start);
+            
+            const fps = parseInt(fpsSelect.value);
+            const maxFrames = Math.floor(trimmedDuration * fps);
+            
+            // Update Slider Max
+            inputs.count.max = Math.max(10, maxFrames);
+            
+            // Clamp current value if it exceeds new max
+            const currentVal = parseInt(inputs.count.value);
+            if (currentVal > maxFrames) {
+                inputs.count.value = maxFrames;
+                displays.count.textContent = maxFrames;
+            }
+        }
 
         async function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -438,13 +727,17 @@
             if(isProcessing) return;
             isProcessing = true;
 
-            targetFrameCount = parseInt(inputs.count.value);
             statusContainer.classList.remove('hidden');
             controlsArea.classList.add('opacity-50', 'pointer-events-none');
             
+            playback.isPlaying = false;
+            playback.currentIndex = 0;
+            timelineInput.value = 0;
+            playPauseBtn.textContent = 'Play';
+            renderer.clear();
+            
             clearStack();
 
-            // Mobile Fix: Video in DOM
             const video = document.createElement('video');
             video.style.display = 'none';
             document.body.appendChild(video);
@@ -455,7 +748,6 @@
             video.autoplay = false;
             video.crossOrigin = "anonymous";
 
-            // Mobile Fix: Wait for metadata
             try {
                 await new Promise((resolve, reject) => {
                     video.onloadedmetadata = () => resolve();
@@ -469,12 +761,44 @@
             }
 
             const duration = (isFinite(video.duration) && video.duration > 0) ? video.duration : 5;
-            const interval = duration / targetFrameCount;
-            let currentTime = 0;
+            
+            // Check if this is a new file (simple heuristic: if max of trim slider is default or 0)
+            // or if the duration doesn't match current trim max
+            if (Math.abs(parseFloat(trimEndInput.max) - duration) > 0.1) {
+                currentVideoDuration = duration;
+                
+                // Update Trim Sliders Limits
+                trimStartInput.max = duration;
+                trimEndInput.max = duration;
+                
+                // Reset Trim positions to Full Video
+                trimStartInput.value = 0;
+                trimEndInput.value = duration;
+                trimValues.textContent = `0.0s - ${duration.toFixed(1)}s`;
+            }
+            
+            // Get Trim Values
+            const startTime = parseFloat(trimStartInput.value);
+            const endTime = parseFloat(trimEndInput.value);
+            const trimDuration = Math.max(0.1, endTime - startTime);
+
+            // Save Gen Params for visibility logic
+            stackGenParams.start = startTime;
+            stackGenParams.end = endTime;
+            stackGenParams.duration = trimDuration;
+
+            // Update limits
+            updateFrameSliderLimits();
+            
+            targetFrameCount = parseInt(inputs.count.value);
+            const maxRes = parseInt(resolutionSelect.value);
+
+            const interval = trimDuration / targetFrameCount;
+            let currentTime = startTime; // Start at trim start
             
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const scaleFactor = Math.min(1, MAX_TEXTURE_SIZE / Math.max(video.videoWidth, video.videoHeight));
+            const scaleFactor = Math.min(1, maxRes / Math.max(video.videoWidth, video.videoHeight));
             canvas.width = video.videoWidth * scaleFactor;
             canvas.height = video.videoHeight * scaleFactor;
 
@@ -538,7 +862,6 @@
             statusContainer.classList.add('hidden');
             controlsArea.classList.remove('opacity-50', 'pointer-events-none');
             
-            // Auto-close panel on successful generation to show off the visual
             togglePanel(false);
         }
 
@@ -553,6 +876,13 @@
                 stackGroup.remove(mesh); 
             }
             frameTextures = [];
+            
+            if(scannerMesh) {
+                scene.remove(scannerMesh);
+                scannerMesh.geometry.dispose();
+                scannerMesh.material.dispose();
+                scannerMesh = null;
+            }
         }
 
         function buildStack(frames) {
@@ -565,9 +895,10 @@
             const modeName = inputs.blendMode.value;
             const baseSize = 10;
 
+            const aspectRatio = frames[0].aspectRatio;
+            const geometry = new THREE.PlaneGeometry(baseSize * aspectRatio, baseSize);
+
             frames.forEach((frameData, index) => {
-                const geometry = new THREE.PlaneGeometry(baseSize * frameData.aspectRatio, baseSize);
-                
                 const material = new THREE.ShaderMaterial({
                     uniforms: {
                         map: { value: frameData.texture },
@@ -591,6 +922,27 @@
                 stackGroup.add(plane);
                 frameTextures.push(plane);
             });
+
+            const scannerMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    map: { value: frames[0].texture }, 
+                    globalOpacity: { value: initialOpacity },
+                    threshold: { value: initialThreshold },
+                    brightThreshold: { value: initialBrightThreshold }
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            scannerMat.blending = THREE[modeName];
+            
+            scannerMesh = new THREE.Mesh(geometry, scannerMat);
+            scannerMesh.rotation.x = -Math.PI / 2;
+            scannerMesh.visible = false;
+            scannerMesh.scale.copy(stackGroup.scale); // Sync scale
+            scene.add(scannerMesh);
 
             const height = frames.length * spacing;
             controls.target.set(0, height / 2, 0);
@@ -626,10 +978,116 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function animate() {
+        function updateVisibility() {
+            if (stackGroup.children.length === 0) return;
+
+            const isSmooth = smoothToggle.checked;
+            const spacing = parseFloat(inputs.spacing.value);
+            
+            if (playback.mode === 'scan' && isSmooth && scannerMesh) {
+                stackGroup.visible = false;
+                scannerMesh.visible = true;
+
+                scannerMesh.position.y = playback.currentIndex * spacing;
+                
+                const texIndex = Math.min(Math.floor(playback.currentIndex), frameTextures.length - 1);
+                const frameMesh = frameTextures[texIndex];
+                if(frameMesh && frameMesh.material.uniforms.map.value) {
+                     scannerMesh.material.uniforms.map.value = frameMesh.material.uniforms.map.value;
+                }
+
+                return; 
+            }
+
+            stackGroup.visible = true;
+            if(scannerMesh) scannerMesh.visible = false;
+
+            const current = Math.floor(playback.currentIndex);
+            const total = stackGroup.children.length;
+            const uiStart = parseFloat(trimStartInput.value);
+            const uiEnd = parseFloat(trimEndInput.value);
+            
+            stackGroup.children.forEach((mesh, index) => {
+                let shouldBeVisible = false;
+
+                if (playback.mode === 'static') {
+                    // Check trim preview
+                    const sliceTime = stackGenParams.start + (index / (total - 1)) * stackGenParams.duration;
+                    // Fuzzy match due to float precision
+                    if (sliceTime >= uiStart - 0.01 && sliceTime <= uiEnd + 0.01) {
+                        shouldBeVisible = true;
+                    }
+                } else if (playback.mode === 'scan') {
+                    if (index === current) shouldBeVisible = true;
+                } else if (playback.mode === 'build') {
+                    if (index <= current) shouldBeVisible = true;
+                }
+                
+                mesh.visible = shouldBeVisible;
+            });
+        }
+
+        function animate(time) {
             requestAnimationFrame(animate);
             controls.update();
+
+            // --- Light Painting Logic ---
+            const isPainting = lightPaintToggle.checked;
+            
+            if (isPainting) {
+                scene.background = null;
+
+                const dist = activeCamera.position.distanceTo(lastCameraPos);
+                const rot = activeCamera.quaternion.angleTo(lastCameraQuat);
+                
+                if (dist > 0.001 || rot > 0.001) {
+                    renderer.clear();
+                } else {
+                    renderer.autoClear = false;
+                }
+            } else {
+                scene.background = backgroundColor;
+                renderer.autoClear = true;
+            }
+
+            lastCameraPos.copy(activeCamera.position);
+            lastCameraQuat.copy(activeCamera.quaternion);
+
             renderer.render(scene, activeCamera);
+
+            if (playback.isPlaying && stackGroup.children.length > 0) {
+                const totalFrames = stackGroup.children.length;
+                const speed = 0.5 * playback.speed; 
+                
+                playback.currentIndex += speed * playback.direction;
+
+                if (playback.loop) {
+                    if (playback.currentIndex >= totalFrames - 0.1) {
+                        playback.currentIndex = totalFrames - 0.1;
+                        playback.direction = -1;
+                    } else if (playback.currentIndex <= 0) {
+                        playback.currentIndex = 0;
+                        playback.direction = 1;
+                    }
+                } else {
+                    if (playback.direction === 1 && playback.currentIndex >= totalFrames - 0.1) {
+                        playback.currentIndex = totalFrames - 0.1;
+                        playback.isPlaying = false;
+                        playPauseBtn.textContent = 'Play';
+                    } else if (playback.direction === -1 && playback.currentIndex <= 0) {
+                        playback.currentIndex = 0;
+                        playback.isPlaying = false;
+                        playPauseBtn.textContent = 'Play';
+                    }
+                }
+                
+                const pct = (playback.currentIndex / (totalFrames - 1)) * 100;
+                timelineInput.value = pct;
+
+                updateVisibility();
+            } else if (!playback.isPlaying && playback.mode === 'scan' && smoothToggle.checked) {
+                updateVisibility();
+            }
         }
 
         init();
